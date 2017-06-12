@@ -146,6 +146,7 @@ void modeCheck(){
     if(digitalRead(BUTTON_PIN)){
       Serial.println("setting mode");
       lcd.clear();
+      lcd.setRGB(0,100,255);
       lcd.print("SETTING_MODE");
       settingLoop();
     }
@@ -156,5 +157,7 @@ void modeCheck(){
 void settingLoop(){
   while(true){
     //send serial message to PC
+    Serial.println("uv");
+    delay(500);
   }
 }
