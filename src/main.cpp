@@ -6,7 +6,7 @@
 
 #define SENSING_DELAY 1000
 #define SETTING_WAIT 3000
-#define BUTTON_PIN 8
+#define BUTTON_PIN 6
 
 #define FILE_TYPE "csv"
 #define FILE_NAME "test"
@@ -19,6 +19,7 @@ String filename = String(FILE_NAME) + String(".") +  String(FILE_TYPE);
 void initLCD();
 void updateLCD();
 void settingLoop();
+void modeCheck();
 
 void setup () {
   while (!Serial);
@@ -33,7 +34,7 @@ void setup () {
   //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   initLCD();
 
-  settingLoop();
+  modeCheck();
 
   delay(2000);
   lcd.setRGB(255,255,255);
@@ -111,12 +112,19 @@ void updateLCD(){
   lcd.print(now.second());
 }
 
-void settingLoop(){
+void modeCheck(){
   int countl = 0;
   while(countl < SETTING_WAIT){
     if(digitalRead(BUTTON_PIN)){
-
+      Serial.println("setting mode");
+      settingLoop();
     }
     countl++;
+  }
+}
+
+void settingLoop(){
+  while(true){
+    //send serial message to PC
   }
 }
