@@ -7,17 +7,21 @@
 #define SENSING_DELAY 1000
 #define SETTING_WAIT 3000
 #define BUTTON_PIN 6
+#define SD_CS_PIN 4
 
-#define FILE_TYPE "csv"
 #define FILE_NAME "test"
-
+#define FILE_TYPE "csv"
 
 RTC_DS1307 rtc;
 rgb_lcd lcd;
 DateTime now;
 String filename = String(FILE_NAME) + String(".") +  String(FILE_TYPE);
+
+void debugSerialPrint();
 void initLCD();
 void updateLCD();
+void logcsv(String);
+void initSD();
 void settingLoop();
 void modeCheck();
 
@@ -33,37 +37,43 @@ void setup () {
   }
   //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   initLCD();
-
+  initSD();
   modeCheck();
-
   delay(2000);
   lcd.setRGB(255,255,255);
 }
 
 void loop () {
-    Serial.print(now.year());
-    Serial.print('/');
-    Serial.print(now.month());
-    Serial.print('/');
-    Serial.print(now.day());
-    Serial.print(',');
-    Serial.print(now.hour());
-    Serial.print(':');
-    Serial.print(now.minute());
-    Serial.print(':');
-    Serial.print(now.second());
-    Serial.println();
-    updateLCD();
-    delay(SENSING_DELAY);
+  String dataString = String(now.year());
+  dataString+="/";
+  dataString+=String(now.month());
+  dataString+="/";
+  dataString+=String(now.day());
+  dataString+=",";
+  dataString+=String(now.hour());
+  dataString+=":";
+  dataString+=String(now.minute());
+  dataString+=":";
+  dataString+=String(now.second());
+  logcsv(dataString);
+  updateLCD();
+  debugSerialPrint();
+  delay(SENSING_DELAY);
 }
 
-void logcsv(String dataString){
-  File dataFile = SD.open(filename, FILE_WRITE);
-  if(dataFile){
-    dataFile.println(dataString);
-    dataFile.close();
-    Serial.println(dataString);
-  }
+void debugSerialPrint(){
+  Serial.print(now.year());
+  Serial.print('/');
+  Serial.print(now.month());
+  Serial.print('/');
+  Serial.print(now.day());
+  Serial.print(',');
+  Serial.print(now.hour());
+  Serial.print(':');
+  Serial.print(now.minute());
+  Serial.print(':');
+  Serial.print(now.second());
+  Serial.println();
 }
 
 void initLCD(){
@@ -112,11 +122,31 @@ void updateLCD(){
   lcd.print(now.second());
 }
 
+void initSD(){
+  if(!SD.begin(SD_CS_PIN)){
+    Serial.println("Card failed, or not present");
+    lcd.clear();
+    lcd.print("SD_ERROR");
+    while(true);
+  }
+  Serial.println("card initialized.");
+}
+
+void logcsv(String dataString){
+  File dataFile = SD.open(filename, FILE_WRITE);
+  if(dataFile){
+    dataFile.println(dataString);
+    dataFile.close();
+  }
+}
+
 void modeCheck(){
   int countl = 0;
   while(countl < SETTING_WAIT){
     if(digitalRead(BUTTON_PIN)){
       Serial.println("setting mode");
+      lcd.clear();
+      lcd.print("SETTING_MODE");
       settingLoop();
     }
     countl++;
