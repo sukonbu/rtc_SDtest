@@ -3,12 +3,15 @@
 #include <rgb_lcd.h>
 
 #define SENSING_DELAY 1000
+#define SETTING_WAIT 3000
+#define BUTTON_PIN 8
 
 RTC_DS1307 rtc;
 rgb_lcd lcd;
 DateTime now;
 void initLCD();
 void updateLCD();
+void settingLoop();
 
 void setup () {
   while (!Serial);
@@ -20,9 +23,13 @@ void setup () {
   if (! rtc.isrunning()) {
     Serial.println("RTC is NOT running!");
   }
-  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-
+  //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   initLCD();
+
+  settingLoop();
+
+  delay(2000);
+  lcd.setRGB(255,255,255);
 }
 
 void loop () {
@@ -67,9 +74,6 @@ void initLCD(){
   lcd.print(':');
   if(now.second() < 10)lcd.print('0');
   lcd.print(now.second());
-  delay(2000);
-  lcd.setRGB(255,255,255);
-
 }
 
 void updateLCD(){
@@ -89,4 +93,14 @@ void updateLCD(){
   lcd.setCursor(12, 0);
   if(now.second() < 10)lcd.print('0');
   lcd.print(now.second());
+}
+
+void settingLoop(){
+  int countl = 0;
+  while(countl < SETTING_WAIT){
+    if(digitalRead(BUTTON_PIN)){
+      
+    }
+    countl++;
+  }
 }
