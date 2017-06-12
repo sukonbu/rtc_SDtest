@@ -1,14 +1,21 @@
 #include <Wire.h>
 #include <RTClib.h>
 #include <rgb_lcd.h>
+#include <SPI.h>
+#include <SD.h>
 
 #define SENSING_DELAY 1000
 #define SETTING_WAIT 3000
 #define BUTTON_PIN 8
 
+#define FILE_TYPE "csv"
+#define FILE_NAME "test"
+
+
 RTC_DS1307 rtc;
 rgb_lcd lcd;
 DateTime now;
+String filename = String(FILE_NAME) + String(".") +  String(FILE_TYPE);
 void initLCD();
 void updateLCD();
 void settingLoop();
@@ -47,6 +54,15 @@ void loop () {
     Serial.println();
     updateLCD();
     delay(SENSING_DELAY);
+}
+
+void logcsv(String dataString){
+  File dataFile = SD.open(filename, FILE_WRITE);
+  if(dataFile){
+    dataFile.println(dataString);
+    dataFile.close();
+    Serial.println(dataString);
+  }
 }
 
 void initLCD(){
@@ -99,7 +115,7 @@ void settingLoop(){
   int countl = 0;
   while(countl < SETTING_WAIT){
     if(digitalRead(BUTTON_PIN)){
-      
+
     }
     countl++;
   }
