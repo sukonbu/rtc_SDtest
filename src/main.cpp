@@ -1,36 +1,17 @@
-#include <Wire.h>
-#include <RTClib.h>
-#include <rgb_lcd.h>
-#include <SPI.h>
-#include <SD.h>
-
-// define setting value
-#define SENSING_DELAY 1000
-#define SETTING_WAIT 3000
-#define BUTTON_PIN 6
-#define SD_CS_PIN 4
-
-// define about logfile
-#define FILE_NAME "test"
-#define FILE_TYPE "csv"
-
-RTC_DS1307 rtc;
-rgb_lcd lcd;
-DateTime now;
-String filename = String(FILE_NAME) + String(".") +  String(FILE_TYPE);
+#define GLOBAL_VALUE_DEFINE
+#include "global.h"
 
 // function prototype
 void debugSerialPrint();
-void initLCD();
-void updateLCD();
 void logcsv(String);
 void initSD();
 void settingLoop();
+String createDataString();
 void modeCheck();
 
 void setup () {
-  //init RTC
   while (!Serial);
+  //init RTC
   Serial.begin(9600);
   if (! rtc.begin()) {
     Serial.println("Couldn't find RTC");
@@ -46,79 +27,21 @@ void setup () {
   // check device mode
   modeCheck();
   // init SDcard
+  filename = String(FILE_NAME) + String(".") +  String(FILE_TYPE);
   initSD();
   delay(2000);
   lcd.setRGB(255,255,255);
 }
 
 void loop () {
-  // create dataString(ex. 2017/6/7,12:20:00)
-  String dataString = String(now.year());
-  dataString+="/";
-  dataString+=String(now.month());
-  dataString+="/";
-  dataString+=String(now.day());
-  dataString+=",";
-  dataString+=String(now.hour());
-  dataString+=":";
-  dataString+=String(now.minute());
-  dataString+=":";
-  dataString+=String(now.second());
   // logging SDcard
-  logcsv(dataString);
+  logcsv(createDataString());
   // update LCD display
   updateLCD();
   // print dataString (test function)
   debugSerialPrint();
   // delay loop
   delay(SENSING_DELAY);
-}
-
-void initLCD(){
-  // initialize LCD
-  lcd.begin(16,2);
-  lcd.setRGB(0,255,0);
-  lcd.print("UV Sensing Ready");
-  lcd.clear();
-  now = rtc.now();
-  if(now.month() < 10)lcd.print('0');
-  lcd.print(now.month());
-  lcd.setCursor(2, 0);
-  lcd.print('/');
-  if(now.day() < 10)lcd.print('0');
-  lcd.print(now.day());
-  lcd.setCursor(5, 0);
-  //lcd.print(',');
-  lcd.print(' ');
-  if(now.hour() < 10)lcd.print('0');
-  lcd.print(now.hour());
-  lcd.setCursor(8, 0);
-  lcd.print(':');
-  if(now.minute() < 10)lcd.print('0');
-  lcd.print(now.minute());
-  lcd.setCursor(11, 0);
-  lcd.print(':');
-  if(now.second() < 10)lcd.print('0');
-  lcd.print(now.second());
-}
-
-void updateLCD(){
-  now = rtc.now();
-  lcd.setCursor(0, 0);
-  if(now.month() < 10)lcd.print('0');
-  lcd.print(now.month());
-  lcd.setCursor(3, 0);
-  if(now.day() < 10)lcd.print('0');
-  lcd.print(now.day());
-  lcd.setCursor(6, 0);
-  if(now.hour() < 10)lcd.print('0');
-  lcd.print(now.hour());
-  lcd.setCursor(9, 0);
-  if(now.minute() < 10)lcd.print('0');
-  lcd.print(now.minute());
-  lcd.setCursor(12, 0);
-  if(now.second() < 10)lcd.print('0');
-  lcd.print(now.second());
 }
 
 void initSD(){
@@ -142,7 +65,7 @@ void logcsv(String dataString){
 void modeCheck(){
   int countl = 0;
   while(countl < SETTING_WAIT){
-    if(digitalRead(BUTTON_PIN)){
+    if(digitalRead(BUTTON_SETTING_PIN)){
       Serial.println("setting mode");
       lcd.clear();
       lcd.setRGB(0,100,255);
@@ -190,6 +113,22 @@ void settingLoop(){
     updateLCD();
     delay(SENSING_DELAY);
   }
+}
+
+String createDataString(){
+  // create dataString(ex. 2017/6/7,12:20:00)
+  String dataString = String(now.year());
+  dataString+="/";
+  dataString+=String(now.month());
+  dataString+="/";
+  dataString+=String(now.day());
+  dataString+=",";
+  dataString+=String(now.hour());
+  dataString+=":";
+  dataString+=String(now.minute());
+  dataString+=":";
+  dataString+=String(now.second());
+  return dataString;
 }
 
 void debugSerialPrint(){

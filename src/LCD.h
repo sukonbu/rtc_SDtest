@@ -1,0 +1,3 @@
+
+void initLCD();
+void updateLCD();
