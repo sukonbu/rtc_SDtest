@@ -10,6 +10,7 @@ String createDataString();
 String createFilenameString();
 void createFileDic();
 void modeCheck();
+void standbyLoop();
 
 void setup () {
   while (!Serial);
@@ -35,6 +36,8 @@ void setup () {
 
   delay(2000);
   lcd.setRGB(255,255,255);
+  standbyLoop();
+  initLCD();
 }
 
 void loop () {
@@ -182,4 +185,24 @@ void debugSerialPrint(){
   Serial.print(':');
   Serial.print(now.second());
   Serial.println();
+}
+
+
+void standbyLoop(){
+  lcd.clear();
+  lcd.setRGB(255,255,255);
+  lcd.setCursor(0, 0);
+  lcd.print("PRESS BUTTON");
+  lcd.setCursor(0, 1);
+  lcd.print("TO SENSING START");
+  while(true){
+    if(digitalRead(BUTTON_SELECT_PIN)){
+      lcd.clear();
+      lcd.setRGB(255,255,255);
+      lcd.setCursor(0, 0);
+      lcd.print("SENSING START");
+      delay(500);
+      break;
+    }
+  }
 }
