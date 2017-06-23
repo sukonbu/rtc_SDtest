@@ -31,6 +31,7 @@
 GLOBAL RTC_DS1307 rtc;
 GLOBAL rgb_lcd lcd;
 GLOBAL DateTime now;
+GLOBAL String dic;
 GLOBAL String filename;
 
 #endif

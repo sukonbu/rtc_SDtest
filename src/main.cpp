@@ -7,6 +7,8 @@ void logcsv(String);
 void initSD();
 void settingLoop();
 String createDataString();
+String createFilenameString();
+void createFileDic();
 void modeCheck();
 
 void setup () {
@@ -20,6 +22,7 @@ void setup () {
   if (! rtc.isrunning()) {
     Serial.println("RTC is NOT running!");
   }
+  now = rtc.now();
   //rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   // init LCD
   initLCD();
@@ -27,8 +30,9 @@ void setup () {
   // check device mode
   modeCheck();
   // init SDcard
-  filename = String(FILE_NAME) + String(".") +  String(FILE_TYPE);
   initSD();
+
+
   delay(2000);
   lcd.setRGB(255,255,255);
 }
@@ -52,6 +56,9 @@ void initSD(){
     while(true);
   }
   Serial.println("card initialized.");
+  createFileDic();
+  filename = dic + createFilenameString() + String(".") +  String(FILE_TYPE);
+  Serial.println(filename);
 }
 
 void logcsv(String dataString){
@@ -129,6 +136,30 @@ String createDataString(){
   dataString+=":";
   dataString+=String(now.second());
   return dataString;
+}
+
+String createFilenameString(){
+  String str = "UV";
+  // now = rtc.now();
+  // str += now.year();
+  // if(now.month() < 10)str+="0";
+  // str += now.month();
+  // if(now.day() < 10)str+="0";
+  // str += now.day();
+  //str += "_";
+  if(now.hour() < 10)str+="0";
+  str += now.hour();
+  if(now.minute() < 10)str += "0";
+  str += now.minute();
+  if(now.second() < 10)str += "0";
+  str += now.second();
+  return str;
+}
+
+void createFileDic(){
+  String dicStr = String(now.year()) + String(now.month()) + String(now.day());
+  if(!SD.exists(dicStr))SD.mkdir(dicStr);
+  dic = dicStr + "/";
 }
 
 void debugSerialPrint(){
