@@ -12,6 +12,9 @@ void createFileDic();
 void modeCheck();
 void standbyLoop();
 
+void checkEnd();
+void reset();
+
 void setup () {
   while (!Serial);
   //init RTC
@@ -30,13 +33,12 @@ void setup () {
   delay(SETTING_WAIT);
   // check device mode
   modeCheck();
-  // init SDcard
-  initSD();
-
-
   delay(2000);
   lcd.setRGB(255,255,255);
   standbyLoop();
+  // init SDcard
+  initSD();
+  // init LCD
   initLCD();
 }
 
@@ -49,14 +51,20 @@ void loop () {
   debugSerialPrint();
   // delay loop
   delay(SENSING_DELAY);
+  checkEnd();
 }
 
 void initSD(){
   if(!SD.begin(SD_CS_PIN)){
     Serial.println("Card failed, or not present");
     lcd.clear();
+    lcd.setCursor(0, 0);
     lcd.print("SD_ERROR");
-    while(true);
+    lcd.setCursor(0, 1);
+    lcd.print("PRESS BUTTON");
+    while(true){
+      checkEnd();
+    }
   }
   Serial.println("card initialized.");
   createFileDic();
@@ -74,7 +82,11 @@ void logcsv(String dataString){
     lcd.setRGB(255, 0, 0);
     lcd.setCursor(0, 0);
     lcd.print("SD EJECTED!!");
-    while(true);
+    lcd.setCursor(0, 1);
+    lcd.print("PRESS BUTTON");
+    while(true){
+      checkEnd();
+    }
   }
 }
 
@@ -187,7 +199,6 @@ void debugSerialPrint(){
   Serial.println();
 }
 
-
 void standbyLoop(){
   lcd.clear();
   lcd.setRGB(255,255,255);
@@ -205,4 +216,18 @@ void standbyLoop(){
       break;
     }
   }
+}
+
+void checkEnd(){
+  if(digitalRead(BUTTON_SELECT_PIN)){
+    lcd.clear();
+    lcd.setRGB(255,255,255);
+    lcd.setCursor(0, 0);
+    lcd.print("SENSING  END");
+    delay(1500);
+    reset();
+  }
+}
+void reset(){
+  asm volatile ("  jmp 0");
 }
