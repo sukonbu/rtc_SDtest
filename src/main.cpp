@@ -66,6 +66,12 @@ void logcsv(String dataString){
   if(dataFile){
     dataFile.println(dataString);
     dataFile.close();
+  }else{
+    lcd.clear();
+    lcd.setRGB(255, 0, 0);
+    lcd.setCursor(0, 0);
+    lcd.print("SD EJECTED!!");
+    while(true);
   }
 }
 
